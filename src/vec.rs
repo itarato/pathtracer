@@ -45,6 +45,18 @@ impl Vec3 {
         Self { x, y, z }
     }
 
+    fn dot(lhs: Self, rhs: Self) -> FloatT {
+        lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
+    }
+
+    fn cross(lhs: Self, rhs: Self) -> Self {
+        Self::new(
+            lhs.y * rhs.z - lhs.z * rhs.y,
+            -(lhs.x * rhs.z - lhs.z * rhs.x),
+            lhs.x * rhs.y - lhs.y * rhs.x,
+        )
+    }
+
     fn at(&self, idx: usize) -> FloatT {
         match idx {
             0 => self.x,
@@ -54,14 +66,22 @@ impl Vec3 {
         }
     }
 
-    fn sqrt_len(&self) -> FloatT {
+    fn squared_len(&self) -> FloatT {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
     fn len(&self) -> FloatT {
-        self.sqrt_len().sqrt()
+        self.squared_len().sqrt()
     }
 
+    // Ref: `vec3::make_unit_vector`.
+    // This "unit" thing is confusing.
+    fn into_unit(&mut self) {
+        let k: FloatT = 1.0 as FloatT / self.squared_len();
+        *self = *self * k;
+    }
+
+    // Ref: `unit_vector(vec3)`.
     fn unit(&self) -> Vec3 {
         *self / self.len()
     }
