@@ -1,6 +1,5 @@
-use crate::defs::*;
-
 use super::vec3::Vec3;
+use crate::defs::*;
 
 #[derive(Clone, Debug, PartialEq, Default, Copy)]
 pub struct Ray {

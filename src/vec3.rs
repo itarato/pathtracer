@@ -33,6 +33,10 @@ macro_rules! impl_flat_arithmetics {
     };
 }
 
+pub trait Upscale<T> {
+    fn upscale(&self) -> T;
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Vec3 {
     pub x: FloatT,
@@ -43,6 +47,10 @@ pub struct Vec3 {
 impl Vec3 {
     pub fn new(x: FloatT, y: FloatT, z: FloatT) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn unif(v: FloatT) -> Self {
+        Self::new(v, v, v)
     }
 
     pub fn dot(lhs: Self, rhs: Self) -> FloatT {
@@ -77,13 +85,19 @@ impl Vec3 {
     // Ref: `vec3::make_unit_vector`.
     // This "unit" thing is confusing.
     pub fn into_unit(&mut self) {
-        let k: FloatT = 1.0 as FloatT / self.squared_len();
+        let k: FloatT = 1.0 as FloatT / self.len();
         *self = *self * k;
     }
 
     // Ref: `unit_vector(vec3)`.
     pub fn unit(&self) -> Vec3 {
         *self / self.len()
+    }
+}
+
+impl Upscale<u8> for FloatT {
+    fn upscale(&self) -> u8 {
+        (*self * 255.99) as u8
     }
 }
 
