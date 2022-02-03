@@ -33,22 +33,21 @@ fn main() {
     let mut stream_writer = write_header.stream_writer().unwrap();
     // END SETUP PNG //////////////////////////////////////////////////////////
 
-    // let bottom_left_corner = Vec3::new(-2.0, -1.0, -1.0);
-    // let horizontal = Vec3::new(4.0, 0.0, 0.0);
-    // let vertical = Vec3::new(0.0, 2.0, 0.0);
-    // let origin = Vec3::unif(0.0);
+    let bottom_left_corner = Vec3::new(-2.0, -1.0, -1.0);
+    let horizontal = Vec3::new(4.0, 0.0, 0.0);
+    let vertical = Vec3::new(0.0, 2.0, 0.0);
+    let origin = Vec3::unif(0.0);
 
     for y in (0..h).rev() {
         for x in 0..w {
-            // let u = (x as FloatT) / (w as FloatT);
-            // let v = (y as FloatT) / (h as FloatT);
+            let u = (x as FloatT) / (w as FloatT);
+            let v = (y as FloatT) / (h as FloatT);
 
-            // let ray = Ray::new(
-            //     origin,
-            //     bottom_left_corner + (horizontal * u) + (vertical * v),
-            // );
-            // let c = color(&ray);
-            let c = Vec3::new(x as FloatT / w as FloatT, y as FloatT / h as FloatT, 0.2);
+            let ray = Ray::new(
+                origin,
+                bottom_left_corner + (horizontal * u) + (vertical * v),
+            );
+            let c = color(&ray);
             stream_writer
                 .write(&[c.x.upscale(), c.y.upscale(), c.z.upscale()])
                 .unwrap();
