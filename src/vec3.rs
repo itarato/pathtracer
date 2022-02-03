@@ -105,10 +105,10 @@ impl_arithmetics!(Add, add, +);
 impl_arithmetics!(Sub, sub, -);
 impl_arithmetics!(Mul, mul, *);
 impl_arithmetics!(Div, div, /);
-impl_assign_arithmetics!(AddAssign, add_assign, +);
-impl_assign_arithmetics!(SubAssign, sub_assign, -);
-impl_assign_arithmetics!(MulAssign, mul_assign, *);
-impl_assign_arithmetics!(DivAssign, div_assign, /);
+// impl_assign_arithmetics!(AddAssign, add_assign, +);
+// impl_assign_arithmetics!(SubAssign, sub_assign, -);
+// impl_assign_arithmetics!(MulAssign, mul_assign, *);
+// impl_assign_arithmetics!(DivAssign, div_assign, /);
 impl_flat_arithmetics!(Add, add, +);
 impl_flat_arithmetics!(Sub, sub, -);
 impl_flat_arithmetics!(Mul, mul, *);
@@ -134,5 +134,38 @@ mod tests {
         assert_eq!(3.0, sum.x);
         assert_eq!(5.0, sum.y);
         assert_eq!(7.0, sum.z);
+    }
+
+    #[test]
+    fn can_mul() {
+        let v1 = Vec3::new(1.0, 2.0, 3.0);
+        let v2 = Vec3::new(2.0, 3.0, 4.0);
+
+        let mul = v1 * v2;
+        assert_eq!(2.0, mul.x);
+        assert_eq!(6.0, mul.y);
+        assert_eq!(12.0, mul.z);
+    }
+
+    #[test]
+    fn can_mul_float() {
+        let v1 = Vec3::new(1.0, 2.0, 3.0);
+        let f = 5.0f32;
+
+        let mul = v1 * f;
+        assert_eq!(5.0, mul.x);
+        assert_eq!(10.0, mul.y);
+        assert_eq!(15.0, mul.z);
+    }
+
+    #[test]
+    fn can_div() {
+        let v1 = Vec3::new(1.0, 2.0, 3.0);
+        let v2 = Vec3::new(2.0, 8.0, 4.0);
+
+        let div = v1 / v2;
+        assert_eq!(0.5, div.x);
+        assert_eq!(0.25, div.y);
+        assert_eq!(0.75, div.z);
     }
 }

@@ -14,7 +14,7 @@ mod vec3;
 fn color(ray: &Ray) -> Vec3 {
     let unit_dir = ray.direction().unit();
     let t = (unit_dir.y + 1.0) * 0.5;
-    (Vec3::unif(1.0) * (1.0 - t)) * (Vec3::new(0.5, 0.7, 1.0) * t)
+    Vec3::unif(1.0 - t) + (Vec3::new(0.5, 0.7, 1.0) * t)
 }
 
 fn main() {
