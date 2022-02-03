@@ -1,3 +1,5 @@
+// Source: https://www.realtimerendering.com/raytracing/Ray%20Tracing%20in%20a%20Weekend.pdf
+
 use defs::FloatT;
 use png::Encoder;
 use ray::Ray;
