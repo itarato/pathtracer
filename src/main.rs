@@ -1,5 +1,6 @@
 // Source: https://www.realtimerendering.com/raytracing/Ray%20Tracing%20in%20a%20Weekend.pdf
 
+mod cam;
 mod defs;
 mod hitable;
 mod hitable_list;
@@ -7,10 +8,12 @@ mod ray;
 mod sphere;
 mod vec3;
 
+use cam::Cam;
 use defs::FloatT;
 use hitable::{HitState, Hitable};
 use hitable_list::HitableList;
 use png::Encoder;
+use rand::prelude::*;
 use ray::Ray;
 use sphere::Sphere;
 use std::{
@@ -32,8 +35,9 @@ fn color(ray: &Ray, hitable: &dyn Hitable) -> Vec3 {
 }
 
 fn main() {
-    let w = 200u32;
-    let h = 100u32;
+    let w = 200u32; // Ref: `nx`
+    let h = 100u32; // Ref: `ny`
+
     // SETUP PNG //////////////////////////////////////////////////////////////
     let file_path = "./output/0.png";
     let file = File::create(file_path).unwrap();
@@ -47,27 +51,30 @@ fn main() {
     let mut stream_writer = write_header.stream_writer().unwrap();
     // END SETUP PNG //////////////////////////////////////////////////////////
 
-    let bottom_left_corner = v3!(-2.0, -1.0, -1.0);
-    let horizontal = v3!(4.0, 0.0, 0.0);
-    let vertical = v3!(0.0, 2.0, 0.0);
-    let origin = v3!(0.0);
-
     let hitable_list: Vec<Box<dyn Hitable>> = vec![
         Box::new(Sphere::new(v3!(0.0, 0.0, -1.0), 0.5)),
         Box::new(Sphere::new(v3!(0.0, -100.5, -1.0), 100.0)),
     ];
     let hitlist = HitableList::new(hitable_list);
 
+    let cam = Cam::new();
+    let anti_alias_attempt = 16;
+    let mut rng = thread_rng();
+
+    // DRAW LOOP //////////////////////////////////////////////////////////////
     for y in (0..h).rev() {
         for x in 0..w {
-            let u = (x as FloatT) / (w as FloatT);
-            let v = (y as FloatT) / (h as FloatT);
+            let mut c = v3!(0.0);
 
-            let ray = Ray::new(
-                origin,
-                bottom_left_corner + (horizontal * u) + (vertical * v),
-            );
-            let c = color(&ray, &hitlist);
+            for _ in 0..anti_alias_attempt {
+                let u = (x as FloatT + rng.gen_range(0.0..1.0)) / (w as FloatT);
+                let v = (y as FloatT + rng.gen_range(0.0..1.0)) / (h as FloatT);
+
+                let ray = cam.ray(u, v);
+                c += color(&ray, &hitlist);
+            }
+            c /= anti_alias_attempt as FloatT;
+
             stream_writer
                 .write(&[c.x.upscale(), c.y.upscale(), c.z.upscale()])
                 .unwrap();

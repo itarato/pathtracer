@@ -43,6 +43,16 @@ macro_rules! impl_flat_arithmetics {
     };
 }
 
+macro_rules! impl_assign_flat_arithmetics {
+    ($traitname:ident, $fname:ident, $op:tt) => {
+        impl $traitname<FloatT> for Vec3 {
+            fn $fname(&mut self, other: FloatT) {
+                *self = Self::new(self.x $op other, self.y $op other, self.z $op other)
+            }
+        }
+    };
+}
+
 pub trait Upscale<T> {
     fn upscale(&self) -> T;
 }
@@ -67,6 +77,7 @@ impl Vec3 {
         lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
     }
 
+    #[allow(dead_code)]
     pub fn cross(lhs: Self, rhs: Self) -> Self {
         Self::new(
             lhs.y * rhs.z - lhs.z * rhs.y,
@@ -85,6 +96,7 @@ impl Vec3 {
 
     // Ref: `vec3::make_unit_vector`.
     // This "unit" thing is confusing.
+    #[allow(dead_code)]
     pub fn into_unit(&mut self) {
         let k: FloatT = 1.0 as FloatT / self.len();
         *self = *self * k;
@@ -114,6 +126,10 @@ impl_flat_arithmetics!(Add, add, +);
 impl_flat_arithmetics!(Sub, sub, -);
 impl_flat_arithmetics!(Mul, mul, *);
 impl_flat_arithmetics!(Div, div, /);
+impl_assign_flat_arithmetics!(AddAssign, add_assign, +);
+impl_assign_flat_arithmetics!(SubAssign, sub_assign, -);
+impl_assign_flat_arithmetics!(MulAssign, mul_assign, *);
+impl_assign_flat_arithmetics!(DivAssign, div_assign, /);
 
 impl Neg for Vec3 {
     type Output = Self;
