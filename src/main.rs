@@ -1,5 +1,11 @@
 // Source: https://www.realtimerendering.com/raytracing/Ray%20Tracing%20in%20a%20Weekend.pdf
 
+mod defs;
+mod hitable;
+mod ray;
+mod sphere;
+mod vec3;
+
 use defs::FloatT;
 use png::Encoder;
 use ray::Ray;
@@ -9,22 +15,25 @@ use std::{
 };
 use vec3::{Upscale, Vec3};
 
-mod defs;
-mod ray;
-mod vec3;
-
-fn hit_sphere(center: Vec3, r: FloatT, ray: &Ray) -> bool {
+fn hit_sphere(center: Vec3, r: FloatT, ray: &Ray) -> FloatT {
     let oc = ray.origin() - center;
     let a = Vec3::dot(ray.direction(), ray.direction());
     let b = Vec3::dot(oc, ray.direction()) * 2.0;
     let c = Vec3::dot(oc, oc) - (r * r);
     let discriminant = b * b - 4.0 * a * c;
-    discriminant > 0.0
+
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-b - discriminant.sqrt()) / (a * 2.0)
+    }
 }
 
 fn color(ray: &Ray) -> Vec3 {
-    if hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, ray) {
-        Vec3::new(1.0, 0.0, 0.0)
+    let t = hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, ray);
+    if t > 0.0 {
+        let n = (ray.point_at(t) - Vec3::new(0.0, 0.0, -1.0)).unit();
+        (n + 1.0) * 0.5
     } else {
         let unit_dir = ray.direction().unit();
         let t = (unit_dir.y + 1.0) * 0.5;

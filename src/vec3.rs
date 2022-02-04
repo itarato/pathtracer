@@ -1,6 +1,16 @@
 use super::defs::*;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+macro_rules! v3 {
+    ($v1:expr, $v2:expr, $v3:expr) => {
+        Vec3::new($v1, $v2, $v3)
+    };
+    ($v1:expr) => {
+        Vec3::unif($v1)
+    };
+}
+pub(crate) use v3;
+
 macro_rules! impl_arithmetics {
     ($traitname:ident, $fname:ident, $op:tt) => {
         impl $traitname for Vec3 {
