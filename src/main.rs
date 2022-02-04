@@ -2,38 +2,28 @@
 
 mod defs;
 mod hitable;
+mod hitable_list;
 mod ray;
 mod sphere;
 mod vec3;
 
 use defs::FloatT;
+use hitable::{HitState, Hitable};
+use hitable_list::HitableList;
 use png::Encoder;
 use ray::Ray;
+use sphere::Sphere;
 use std::{
     fs::File,
     io::{BufWriter, Write},
 };
-use vec3::{Upscale, Vec3};
+use vec3::{v3, Upscale, Vec3};
 
-fn hit_sphere(center: Vec3, r: FloatT, ray: &Ray) -> FloatT {
-    let oc = ray.origin() - center;
-    let a = Vec3::dot(ray.direction(), ray.direction());
-    let b = Vec3::dot(oc, ray.direction()) * 2.0;
-    let c = Vec3::dot(oc, oc) - (r * r);
-    let discriminant = b * b - 4.0 * a * c;
+fn color(ray: &Ray, hitable: &dyn Hitable) -> Vec3 {
+    let mut hit_state = HitState::default();
 
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-b - discriminant.sqrt()) / (a * 2.0)
-    }
-}
-
-fn color(ray: &Ray) -> Vec3 {
-    let t = hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, ray);
-    if t > 0.0 {
-        let n = (ray.point_at(t) - Vec3::new(0.0, 0.0, -1.0)).unit();
-        (n + 1.0) * 0.5
+    if hitable.hit(ray, 0.0, FloatT::MAX, &mut hit_state) {
+        (hit_state.normal + 1.0) * 0.5
     } else {
         let unit_dir = ray.direction().unit();
         let t = (unit_dir.y + 1.0) * 0.5;
@@ -62,6 +52,12 @@ fn main() {
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let origin = Vec3::unif(0.0);
 
+    let hitable_list: Vec<Box<dyn Hitable>> = vec![
+        Box::new(Sphere::new(v3!(0.0, 0.0, -1.0), 0.5)),
+        Box::new(Sphere::new(v3!(0.0, -100.5, -1.0), 100.0)),
+    ];
+    let hitlist = HitableList::new(hitable_list);
+
     for y in (0..h).rev() {
         for x in 0..w {
             let u = (x as FloatT) / (w as FloatT);
@@ -71,7 +67,7 @@ fn main() {
                 origin,
                 bottom_left_corner + (horizontal * u) + (vertical * v),
             );
-            let c = color(&ray);
+            let c = color(&ray, &hitlist);
             stream_writer
                 .write(&[c.x.upscale(), c.y.upscale(), c.z.upscale()])
                 .unwrap();

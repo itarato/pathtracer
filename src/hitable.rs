@@ -2,6 +2,7 @@ use super::defs::*;
 use super::vec3::Vec3;
 use crate::ray::Ray;
 
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct HitState {
     pub t: FloatT,
     pub p: Vec3,

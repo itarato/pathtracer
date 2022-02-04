@@ -3,7 +3,7 @@ use crate::hitable::*;
 use crate::ray::Ray;
 use crate::vec3::{v3, Vec3};
 
-struct Sphere {
+pub struct Sphere {
     center: Vec3,
     r: FloatT,
 }
