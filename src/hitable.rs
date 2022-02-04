@@ -1,18 +1,12 @@
-use super::defs::*;
-use super::vec3::Vec3;
+use crate::defs::*;
 use crate::ray::Ray;
+use crate::vec3::Vec3;
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct HitState {
     pub t: FloatT,
     pub p: Vec3,
     pub normal: Vec3,
-}
-
-impl HitState {
-    pub fn new(t: FloatT, p: Vec3, normal: Vec3) -> Self {
-        Self { t, p, normal }
-    }
 }
 
 pub trait Hitable {

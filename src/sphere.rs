@@ -1,7 +1,7 @@
 use crate::defs::*;
 use crate::hitable::*;
 use crate::ray::Ray;
-use crate::vec3::{v3, Vec3};
+use crate::vec3::Vec3;
 
 pub struct Sphere {
     center: Vec3,

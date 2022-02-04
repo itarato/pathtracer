@@ -27,7 +27,7 @@ fn color(ray: &Ray, hitable: &dyn Hitable) -> Vec3 {
     } else {
         let unit_dir = ray.direction().unit();
         let t = (unit_dir.y + 1.0) * 0.5;
-        Vec3::unif(1.0 - t) + (Vec3::new(0.5, 0.7, 1.0) * t)
+        v3!(1.0 - t) + (v3!(0.5, 0.7, 1.0) * t)
     }
 }
 
@@ -47,10 +47,10 @@ fn main() {
     let mut stream_writer = write_header.stream_writer().unwrap();
     // END SETUP PNG //////////////////////////////////////////////////////////
 
-    let bottom_left_corner = Vec3::new(-2.0, -1.0, -1.0);
-    let horizontal = Vec3::new(4.0, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, 2.0, 0.0);
-    let origin = Vec3::unif(0.0);
+    let bottom_left_corner = v3!(-2.0, -1.0, -1.0);
+    let horizontal = v3!(4.0, 0.0, 0.0);
+    let vertical = v3!(0.0, 2.0, 0.0);
+    let origin = v3!(0.0);
 
     let hitable_list: Vec<Box<dyn Hitable>> = vec![
         Box::new(Sphere::new(v3!(0.0, 0.0, -1.0), 0.5)),

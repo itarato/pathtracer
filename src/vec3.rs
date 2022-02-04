@@ -1,4 +1,4 @@
-use super::defs::*;
+use crate::defs::*;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 macro_rules! v3 {
@@ -75,15 +75,6 @@ impl Vec3 {
         )
     }
 
-    pub fn at(&self, idx: usize) -> FloatT {
-        match idx {
-            0 => self.x,
-            1 => self.y,
-            2 => self.z,
-            _ => panic!(),
-        }
-    }
-
     pub fn squared_len(&self) -> FloatT {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
@@ -115,10 +106,10 @@ impl_arithmetics!(Add, add, +);
 impl_arithmetics!(Sub, sub, -);
 impl_arithmetics!(Mul, mul, *);
 impl_arithmetics!(Div, div, /);
-// impl_assign_arithmetics!(AddAssign, add_assign, +);
-// impl_assign_arithmetics!(SubAssign, sub_assign, -);
-// impl_assign_arithmetics!(MulAssign, mul_assign, *);
-// impl_assign_arithmetics!(DivAssign, div_assign, /);
+impl_assign_arithmetics!(AddAssign, add_assign, +);
+impl_assign_arithmetics!(SubAssign, sub_assign, -);
+impl_assign_arithmetics!(MulAssign, mul_assign, *);
+impl_assign_arithmetics!(DivAssign, div_assign, /);
 impl_flat_arithmetics!(Add, add, +);
 impl_flat_arithmetics!(Sub, sub, -);
 impl_flat_arithmetics!(Mul, mul, *);
@@ -133,12 +124,12 @@ impl Neg for Vec3 {
 
 #[cfg(test)]
 mod tests {
-    use super::Vec3;
+    use crate::Vec3;
 
     #[test]
     fn can_add() {
-        let v1 = Vec3::new(1.0, 2.0, 3.0);
-        let v2 = Vec3::new(2.0, 3.0, 4.0);
+        let v1 = v3!(1.0, 2.0, 3.0);
+        let v2 = v3!(2.0, 3.0, 4.0);
 
         let sum = v1 + v2;
         assert_eq!(3.0, sum.x);
@@ -148,8 +139,8 @@ mod tests {
 
     #[test]
     fn can_mul() {
-        let v1 = Vec3::new(1.0, 2.0, 3.0);
-        let v2 = Vec3::new(2.0, 3.0, 4.0);
+        let v1 = v3!(1.0, 2.0, 3.0);
+        let v2 = v3!(2.0, 3.0, 4.0);
 
         let mul = v1 * v2;
         assert_eq!(2.0, mul.x);
@@ -159,7 +150,7 @@ mod tests {
 
     #[test]
     fn can_mul_float() {
-        let v1 = Vec3::new(1.0, 2.0, 3.0);
+        let v1 = v3!(1.0, 2.0, 3.0);
         let f = 5.0f32;
 
         let mul = v1 * f;
@@ -170,8 +161,8 @@ mod tests {
 
     #[test]
     fn can_div() {
-        let v1 = Vec3::new(1.0, 2.0, 3.0);
-        let v2 = Vec3::new(2.0, 8.0, 4.0);
+        let v1 = v3!(1.0, 2.0, 3.0);
+        let v2 = v3!(2.0, 8.0, 4.0);
 
         let div = v1 / v2;
         assert_eq!(0.5, div.x);
