@@ -9,7 +9,7 @@ pub struct HitState {
     pub t: FloatT,
     pub p: Vec3,
     pub normal: Vec3,
-    pub material: Option<Box<Rc<dyn Material>>>,
+    pub material: Option<Rc<dyn Material>>,
 }
 
 pub trait Hitable {

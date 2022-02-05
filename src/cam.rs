@@ -17,7 +17,7 @@ impl Cam {
             origin: v3!(0.0),
             bottom_left_corner: v3!(-2.0, -1.0, -1.0),
             horizontal: v3!(4.0, 0.0, 0.0),
-            vertical: v3!(0.0, 2.0, 0.0),
+            vertical: v3!(0.0, 4.0, 0.0),
         }
     }
 

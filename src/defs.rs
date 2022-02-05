@@ -11,7 +11,7 @@ pub fn rand_in_unit_sphere() -> Vec3 {
     loop {
         p = v3!(rng.gen(), rng.gen(), rng.gen()) * 2.0 - v3!(1.0);
 
-        if p.squared_len() >= 1.0 {
+        if p.squared_len() <= 1.0 {
             break;
         }
     }

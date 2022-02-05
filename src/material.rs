@@ -1,4 +1,9 @@
-use crate::{defs, hitable::HitState, ray::Ray, vec3::Vec3};
+use crate::{
+    defs::{self, rand_in_unit_sphere, FloatT},
+    hitable::HitState,
+    ray::Ray,
+    vec3::Vec3,
+};
 
 fn reflect(v: Vec3, n: Vec3) -> Vec3 {
     v - n * Vec3::dot(v, n) * 2.0
@@ -42,11 +47,14 @@ impl Material for Lambertian {
 
 pub struct Metal {
     albedo: Vec3,
+    fuzz: FloatT,
 }
 
 impl Metal {
-    pub fn new(albedo: Vec3) -> Self {
-        Self { albedo }
+    pub fn new(albedo: Vec3, fuzz: FloatT) -> Self {
+        debug_assert!(fuzz <= 1.0);
+
+        Self { albedo, fuzz }
     }
 }
 
@@ -59,7 +67,7 @@ impl Material for Metal {
         scattered: &mut Ray,
     ) -> bool {
         let reflected = reflect(ray_in.direction().unit(), hit_state.normal);
-        *scattered = Ray::new(hit_state.p, reflected);
+        *scattered = Ray::new(hit_state.p, reflected + rand_in_unit_sphere() * self.fuzz);
         *attenuation = self.albedo;
 
         Vec3::dot(scattered.direction(), hit_state.normal) > 0.0

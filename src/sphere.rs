@@ -9,11 +9,11 @@ use crate::vec3::Vec3;
 pub struct Sphere {
     center: Vec3,
     r: FloatT,
-    material: Box<Rc<dyn Material>>,
+    material: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, r: FloatT, material: Box<Rc<dyn Material>>) -> Self {
+    pub fn new(center: Vec3, r: FloatT, material: Rc<dyn Material>) -> Self {
         Self {
             center,
             r,

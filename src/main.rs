@@ -53,8 +53,8 @@ fn color(ray: &Ray, hitable: &dyn Hitable, depth: i32) -> Vec3 {
 }
 
 fn main() {
-    let w = 200u32; // Ref: `nx`
-    let h = 100u32; // Ref: `ny`
+    let w = 2048u32; // Ref: `nx`
+    let h = 2048u32; // Ref: `ny`
 
     // SETUP PNG //////////////////////////////////////////////////////////////
     let file_path = "./output/0.png";
@@ -63,33 +63,22 @@ fn main() {
     let mut encoder = Encoder::new(&mut buf_writer, w, h);
 
     encoder.set_color(png::ColorType::Rgb);
-    encoder.set_depth(png::BitDepth::Eight);
+    encoder.set_depth(png::BitDepth::Sixteen);
 
     let mut write_header = encoder.write_header().unwrap();
     let mut stream_writer = write_header.stream_writer().unwrap();
     // END SETUP PNG //////////////////////////////////////////////////////////
 
+    let mat1 = Rc::new(Lambertian::new(v3!(0.8, 0.3, 0.3)));
+    let mat2 = Rc::new(Lambertian::new(v3!(0.8, 0.8, 0.0)));
+    let mat3 = Rc::new(Metal::new(v3!(0.8, 0.6, 0.2), 0.1));
+    let mat4 = Rc::new(Metal::new(v3!(0.8, 0.8, 0.8), 0.5));
+
     let hitable_list: Vec<Box<dyn Hitable>> = vec![
-        Box::new(Sphere::new(
-            v3!(0.0, 0.0, -1.0),
-            0.5,
-            Box::new(Rc::new(Lambertian::new(v3!(0.8, 0.3, 0.3)))),
-        )),
-        Box::new(Sphere::new(
-            v3!(0.0, -100.5, -1.0),
-            100.0,
-            Box::new(Rc::new(Lambertian::new(v3!(0.8, 0.8, 0.0)))),
-        )),
-        Box::new(Sphere::new(
-            v3!(1.0, 0.0, -1.0),
-            0.5,
-            Box::new(Rc::new(Metal::new(v3!(0.8, 0.6, 0.2)))),
-        )),
-        Box::new(Sphere::new(
-            v3!(-1.0, 0.0, -1.0),
-            0.5,
-            Box::new(Rc::new(Metal::new(v3!(0.8, 0.8, 0.8)))),
-        )),
+        Box::new(Sphere::new(v3!(0.0, 0.0, -1.0), 0.5, mat1.clone())),
+        Box::new(Sphere::new(v3!(0.0, -100.5, -1.0), 100.0, mat2.clone())),
+        Box::new(Sphere::new(v3!(1.0, 0.0, -1.0), 0.5, mat3.clone())),
+        Box::new(Sphere::new(v3!(-1.0, 0.0, -1.0), 0.5, mat4.clone())),
     ];
     let hitlist = HitableList::new(hitable_list);
 
@@ -111,11 +100,18 @@ fn main() {
             }
             c /= anti_alias_attempt as FloatT;
 
+            let r = c.x.sqrt().upscale();
+            let g = c.y.sqrt().upscale();
+            let b = c.z.sqrt().upscale();
+
             stream_writer
                 .write(&[
-                    c.x.sqrt().upscale(),
-                    c.y.sqrt().upscale(),
-                    c.z.sqrt().upscale(),
+                    (r >> 8) as u8,
+                    (r | 0xff) as u8,
+                    (g >> 8) as u8,
+                    (g | 0xff) as u8,
+                    (b >> 8) as u8,
+                    (b | 0xff) as u8,
                 ])
                 .unwrap();
         }

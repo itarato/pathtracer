@@ -108,9 +108,9 @@ impl Vec3 {
     }
 }
 
-impl Upscale<u8> for FloatT {
-    fn upscale(&self) -> u8 {
-        (*self * 255.99) as u8
+impl Upscale<u16> for FloatT {
+    fn upscale(&self) -> u16 {
+        (*self * 65535.99) as u16
     }
 }
 
