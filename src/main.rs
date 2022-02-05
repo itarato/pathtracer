@@ -22,11 +22,28 @@ use std::{
 };
 use vec3::{v3, Upscale, Vec3};
 
+fn rand_in_unit_sphere() -> Vec3 {
+    let mut p;
+
+    let mut rng = thread_rng();
+
+    loop {
+        p = v3!(rng.gen(), rng.gen(), rng.gen()) * 2.0 - v3!(1.0);
+
+        if p.squared_len() >= 1.0 {
+            break;
+        }
+    }
+
+    p
+}
+
 fn color(ray: &Ray, hitable: &dyn Hitable) -> Vec3 {
     let mut hit_state = HitState::default();
 
-    if hitable.hit(ray, 0.0, FloatT::MAX, &mut hit_state) {
-        (hit_state.normal + 1.0) * 0.5
+    if hitable.hit(ray, 0.001, FloatT::MAX, &mut hit_state) {
+        let target = hit_state.p + hit_state.normal + rand_in_unit_sphere();
+        color(&Ray::new(hit_state.p, target - hit_state.p), hitable) * 0.5
     } else {
         let unit_dir = ray.direction().unit();
         let t = (unit_dir.y + 1.0) * 0.5;
@@ -76,7 +93,11 @@ fn main() {
             c /= anti_alias_attempt as FloatT;
 
             stream_writer
-                .write(&[c.x.upscale(), c.y.upscale(), c.z.upscale()])
+                .write(&[
+                    c.x.sqrt().upscale(),
+                    c.y.sqrt().upscale(),
+                    c.z.sqrt().upscale(),
+                ])
                 .unwrap();
         }
     }
