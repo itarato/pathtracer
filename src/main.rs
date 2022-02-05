@@ -13,7 +13,7 @@ use cam::Cam;
 use defs::FloatT;
 use hitable::{HitState, Hitable};
 use hitable_list::HitableList;
-use material::{Lambertian, Metal};
+use material::{Dialectric, Lambertian, Metal};
 use png::Encoder;
 use rand::prelude::*;
 use ray::Ray;
@@ -53,8 +53,10 @@ fn color(ray: &Ray, hitable: &dyn Hitable, depth: i32) -> Vec3 {
 }
 
 fn main() {
-    let w = 2048u32; // Ref: `nx`
-    let h = 2048u32; // Ref: `ny`
+    // let w = 2048u32; // Ref: `nx`
+    // let h = 2048u32; // Ref: `ny`
+    let w = 512u32; // Ref: `nx`
+    let h = 512u32; // Ref: `ny`
 
     // SETUP PNG //////////////////////////////////////////////////////////////
     let file_path = "./output/0.png";
@@ -69,21 +71,22 @@ fn main() {
     let mut stream_writer = write_header.stream_writer().unwrap();
     // END SETUP PNG //////////////////////////////////////////////////////////
 
-    let mat1 = Rc::new(Lambertian::new(v3!(0.8, 0.3, 0.3)));
+    let mat1 = Rc::new(Lambertian::new(v3!(0.1, 0.2, 0.5)));
     let mat2 = Rc::new(Lambertian::new(v3!(0.8, 0.8, 0.0)));
     let mat3 = Rc::new(Metal::new(v3!(0.8, 0.6, 0.2), 0.1));
-    let mat4 = Rc::new(Metal::new(v3!(0.8, 0.8, 0.8), 0.5));
+    let mat4 = Rc::new(Dialectric::new(1.5));
 
     let hitable_list: Vec<Box<dyn Hitable>> = vec![
         Box::new(Sphere::new(v3!(0.0, 0.0, -1.0), 0.5, mat1.clone())),
         Box::new(Sphere::new(v3!(0.0, -100.5, -1.0), 100.0, mat2.clone())),
         Box::new(Sphere::new(v3!(1.0, 0.0, -1.0), 0.5, mat3.clone())),
         Box::new(Sphere::new(v3!(-1.0, 0.0, -1.0), 0.5, mat4.clone())),
+        Box::new(Sphere::new(v3!(-1.0, 0.0, -1.0), -0.45, mat4.clone())),
     ];
     let hitlist = HitableList::new(hitable_list);
 
     let cam = Cam::new();
-    let anti_alias_attempt = 16;
+    let anti_alias_attempt = 32;
     let mut rng = thread_rng();
 
     // DRAW LOOP //////////////////////////////////////////////////////////////
