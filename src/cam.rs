@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use crate::{
     defs::FloatT,
     ray::Ray,
@@ -12,12 +14,16 @@ pub struct Cam {
 }
 
 impl Cam {
-    pub fn new() -> Self {
+    pub fn new(vfov: FloatT, aspect: FloatT) -> Self {
+        let theta = vfov * PI / 180.0;
+        let half_h = (theta / 2.0).tan();
+        let half_w = aspect * half_h;
+
         Self {
             origin: v3!(0.0),
-            bottom_left_corner: v3!(-2.0, -1.0, -1.0),
-            horizontal: v3!(4.0, 0.0, 0.0),
-            vertical: v3!(0.0, 4.0, 0.0),
+            bottom_left_corner: v3!(-half_w, -half_h, -1.0),
+            horizontal: v3!(2.0 * half_w, 0.0, 0.0),
+            vertical: v3!(0.0, 2.0 * half_h, 0.0),
         }
     }
 

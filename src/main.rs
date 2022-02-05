@@ -85,7 +85,7 @@ fn main() {
     ];
     let hitlist = HitableList::new(hitable_list);
 
-    let cam = Cam::new();
+    let cam = Cam::new(120.0, w as FloatT / h as FloatT);
     let anti_alias_attempt = 32;
     let mut rng = thread_rng();
 
