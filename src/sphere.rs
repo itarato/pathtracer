@@ -1,16 +1,24 @@
+use std::rc::Rc;
+
 use crate::defs::*;
 use crate::hitable::*;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 pub struct Sphere {
     center: Vec3,
     r: FloatT,
+    material: Box<Rc<dyn Material>>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, r: FloatT) -> Self {
-        Self { center, r }
+    pub fn new(center: Vec3, r: FloatT, material: Box<Rc<dyn Material>>) -> Self {
+        Self {
+            center,
+            r,
+            material,
+        }
     }
 }
 
@@ -29,6 +37,7 @@ impl Hitable for Sphere {
                 state.t = temp;
                 state.p = ray.point_at(temp);
                 state.normal = (state.p - self.center) / self.r;
+                state.material = Some(self.material.clone());
                 return true;
             }
 
@@ -37,6 +46,7 @@ impl Hitable for Sphere {
                 state.t = temp;
                 state.p = ray.point_at(temp);
                 state.normal = (state.p - self.center) / self.r;
+                state.material = Some(self.material.clone());
                 return true;
             }
         }

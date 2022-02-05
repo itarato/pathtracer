@@ -26,7 +26,7 @@ impl Hitable for HitableList {
             if e.hit(ray, t_min, closest, &mut hit_state) {
                 did_hit = true;
                 closest = hit_state.t;
-                *state = hit_state;
+                *state = hit_state.clone();
             }
         }
 

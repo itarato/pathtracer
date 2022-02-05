@@ -1,9 +1,10 @@
-// Source: https://www.realtimerendering.com/raytracing/Ray%20Tracing%20in%20a%20Weekend.pdf
+// Source: https://www.realtimerendering.com/raytracing/Ray%20Tracing%20in%20a%20Weekend.pdfs
 
 mod cam;
 mod defs;
 mod hitable;
 mod hitable_list;
+mod material;
 mod ray;
 mod sphere;
 mod vec3;
@@ -12,6 +13,7 @@ use cam::Cam;
 use defs::FloatT;
 use hitable::{HitState, Hitable};
 use hitable_list::HitableList;
+use material::{Lambertian, Metal};
 use png::Encoder;
 use rand::prelude::*;
 use ray::Ray;
@@ -19,31 +21,30 @@ use sphere::Sphere;
 use std::{
     fs::File,
     io::{BufWriter, Write},
+    rc::Rc,
 };
 use vec3::{v3, Upscale, Vec3};
 
-fn rand_in_unit_sphere() -> Vec3 {
-    let mut p;
-
-    let mut rng = thread_rng();
-
-    loop {
-        p = v3!(rng.gen(), rng.gen(), rng.gen()) * 2.0 - v3!(1.0);
-
-        if p.squared_len() >= 1.0 {
-            break;
-        }
-    }
-
-    p
-}
-
-fn color(ray: &Ray, hitable: &dyn Hitable) -> Vec3 {
+fn color(ray: &Ray, hitable: &dyn Hitable, depth: i32) -> Vec3 {
     let mut hit_state = HitState::default();
 
     if hitable.hit(ray, 0.001, FloatT::MAX, &mut hit_state) {
-        let target = hit_state.p + hit_state.normal + rand_in_unit_sphere();
-        color(&Ray::new(hit_state.p, target - hit_state.p), hitable) * 0.5
+        let mut scattered = Ray::default();
+        let mut attenuation = Vec3::default();
+
+        let hit_state_clone = hit_state.clone();
+        if depth < 50
+            && hit_state.material.unwrap().scatter(
+                &ray,
+                &hit_state_clone,
+                &mut attenuation,
+                &mut scattered,
+            )
+        {
+            attenuation * color(&scattered, hitable, depth + 1)
+        } else {
+            v3!(0.0)
+        }
     } else {
         let unit_dir = ray.direction().unit();
         let t = (unit_dir.y + 1.0) * 0.5;
@@ -69,8 +70,26 @@ fn main() {
     // END SETUP PNG //////////////////////////////////////////////////////////
 
     let hitable_list: Vec<Box<dyn Hitable>> = vec![
-        Box::new(Sphere::new(v3!(0.0, 0.0, -1.0), 0.5)),
-        Box::new(Sphere::new(v3!(0.0, -100.5, -1.0), 100.0)),
+        Box::new(Sphere::new(
+            v3!(0.0, 0.0, -1.0),
+            0.5,
+            Box::new(Rc::new(Lambertian::new(v3!(0.8, 0.3, 0.3)))),
+        )),
+        Box::new(Sphere::new(
+            v3!(0.0, -100.5, -1.0),
+            100.0,
+            Box::new(Rc::new(Lambertian::new(v3!(0.8, 0.8, 0.0)))),
+        )),
+        Box::new(Sphere::new(
+            v3!(1.0, 0.0, -1.0),
+            0.5,
+            Box::new(Rc::new(Metal::new(v3!(0.8, 0.6, 0.2)))),
+        )),
+        Box::new(Sphere::new(
+            v3!(-1.0, 0.0, -1.0),
+            0.5,
+            Box::new(Rc::new(Metal::new(v3!(0.8, 0.8, 0.8)))),
+        )),
     ];
     let hitlist = HitableList::new(hitable_list);
 
@@ -88,7 +107,7 @@ fn main() {
                 let v = (y as FloatT + rng.gen_range(0.0..1.0)) / (h as FloatT);
 
                 let ray = cam.ray(u, v);
-                c += color(&ray, &hitlist);
+                c += color(&ray, &hitlist, 0);
             }
             c /= anti_alias_attempt as FloatT;
 
