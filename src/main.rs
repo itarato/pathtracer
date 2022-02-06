@@ -85,12 +85,16 @@ fn main() {
     ];
     let hitlist = HitableList::new(hitable_list);
 
+    let lookfrom = v3!(3.0, 3.0, 2.0);
+    let lookat = v3!(0.0, 0.0, -1.0);
     let cam = Cam::new(
-        v3!(-2.0, 2.0, 1.0),
-        v3!(0.0, 0.0, -1.0),
+        lookfrom,
+        lookat,
         v3!(0.0, 1.0, 0.0),
-        60.0,
+        32.0,
         w as FloatT / h as FloatT,
+        2.0,
+        (lookfrom - lookat).len(),
     );
     let anti_alias_attempt = 32;
     let mut rng = thread_rng();
