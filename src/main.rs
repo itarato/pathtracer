@@ -89,7 +89,7 @@ fn main() {
         v3!(-2.0, 2.0, 1.0),
         v3!(0.0, 0.0, -1.0),
         v3!(0.0, 1.0, 0.0),
-        90.0,
+        60.0,
         w as FloatT / h as FloatT,
     );
     let anti_alias_attempt = 32;
