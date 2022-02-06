@@ -1,5 +1,3 @@
-// Source: https://www.realtimerendering.com/raytracing/Ray%20Tracing%20in%20a%20Weekend.pdfs
-
 mod cam;
 mod defs;
 mod hitable;
@@ -13,7 +11,7 @@ use cam::Cam;
 use defs::FloatT;
 use hitable::{HitState, Hitable};
 use hitable_list::HitableList;
-use material::{Dialectric, Lambertian, Metal};
+use material::{Dialectric, Lambertian, Material, Metal};
 use png::Encoder;
 use rand::prelude::*;
 use ray::Ray;
@@ -53,10 +51,12 @@ fn color(ray: &Ray, hitable: &dyn Hitable, depth: i32) -> Vec3 {
 }
 
 fn main() {
-    // let w = 2048u32; // Ref: `nx`
-    // let h = 2048u32; // Ref: `ny`
-    let w = 512u32; // Ref: `nx`
-    let h = 512u32; // Ref: `ny`
+    let w = 2048u32; // Ref: `nx`
+    let h = 1024u32; // Ref: `ny`
+                     // let w = 512u32; // Ref: `nx`
+                     // let h = 512u32; // Ref: `ny`
+                     // let w = 256u32; // Ref: `nx`
+                     // let h = 128u32; // Ref: `ny`
 
     // SETUP PNG //////////////////////////////////////////////////////////////
     let file_path = "./output/0.png";
@@ -73,47 +73,62 @@ fn main() {
 
     let mat1 = Rc::new(Lambertian::new(v3!(0.1, 0.2, 0.5)));
     let mat2 = Rc::new(Lambertian::new(v3!(0.5, 0.5, 0.5)));
-    let mat3 = Rc::new(Metal::new(v3!(0.8, 0.6, 0.2), 0.1));
+    let mat3 = Rc::new(Metal::new(v3!(0.8, 0.6, 0.2), 0.0));
     let mat4 = Rc::new(Dialectric::new(1.5));
 
     let mut hitable_list: Vec<Box<dyn Hitable>> = vec![
-        Box::new(Sphere::new(v3!(-2.5, 1.0, -1.0), 1.0, mat1.clone())),
+        Box::new(Sphere::new(v3!(-2.0, 1.0, -1.0), 1.0, mat1.clone())),
         Box::new(Sphere::new(v3!(0.0, -1000.0, 0.0), 1000.0, mat2.clone())),
-        Box::new(Sphere::new(v3!(2.5, 1.0, -1.0), 1.0, mat3.clone())),
+        Box::new(Sphere::new(v3!(2.0, 1.0, -1.0), 1.0, mat3.clone())),
         Box::new(Sphere::new(v3!(0.0, 1.0, -1.0), 1.0, mat4.clone())),
-        Box::new(Sphere::new(v3!(0.0, 1.0, -1.0), -0.9, mat4.clone())),
+        // Trick to make a thick glass.
+        // Box::new(Sphere::new(v3!(0.0, 1.0, -1.0), -0.9, mat4.clone())),
     ];
 
     let mut rng = thread_rng();
 
-    let rand_spread_h: FloatT = 4.0;
-    for _ in 0..32 {
-        let rand_spread_r = 0.2 as FloatT..0.4 as FloatT;
+    let rand_spread_h: FloatT = 8.0;
+    for _ in 0..128 {
+        let rand_spread_r = 0.2 as FloatT..0.3 as FloatT;
         let rand_r = rng.gen_range(rand_spread_r.clone());
-        hitable_list.push(Box::new(Sphere::new(
-            v3!(
-                rng.gen_range(-rand_spread_h..rand_spread_h),
-                rng.gen_range(0.0..rand_r) + rand_r,
-                rng.gen_range(-rand_spread_h..rand_spread_h) - 1.0
-            ),
-            rand_r,
-            Rc::new(Lambertian::new(v3!(
+
+        let mat: Rc<dyn Material> = match rng.gen_range(0..3) {
+            0 => Rc::new(Lambertian::new(v3!(
                 rng.gen_range(0.0..1.0),
                 rng.gen_range(0.0..1.0),
                 rng.gen_range(0.0..1.0)
             ))),
+            1 => Rc::new(Metal::new(
+                v3!(
+                    rng.gen_range(0.0..1.0),
+                    rng.gen_range(0.0..1.0),
+                    rng.gen_range(0.0..1.0)
+                ),
+                rng.gen_range(0.0..1.0),
+            )),
+            _ => Rc::new(Dialectric::new(rng.gen_range(0.0..4.0))),
+        };
+
+        hitable_list.push(Box::new(Sphere::new(
+            v3!(
+                rng.gen_range(-rand_spread_h..rand_spread_h),
+                rand_r,
+                rng.gen_range(-rand_spread_h..rand_spread_h) - 1.0
+            ),
+            rand_r,
+            mat,
         )));
     }
 
     let hitlist = HitableList::new(hitable_list);
 
-    let lookfrom = v3!(0.0, 2.0, 6.0);
+    let lookfrom = v3!(4.0, 1.75, 1.25);
     let lookat = v3!(0.0, 0.0, -1.0);
     let cam = Cam::new(
         lookfrom,
         lookat,
-        v3!(0.0, 1.0, 0.0),
-        90.0,
+        v3!(1.0, 2.0, 0.4),
+        80.0,
         w as FloatT / h as FloatT,
         0.001,
         (lookfrom - lookat).len(),
